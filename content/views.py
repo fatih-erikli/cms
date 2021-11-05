@@ -32,10 +32,10 @@ def dispatch(request):
             row = CONTENT_OBJECT
 
         if is_start_tag:
-            built.append(('''open<%(html_tag)s style="%(styles)s">%(text)s''' % {
+            built.append(('''<%(html_tag)s style="%(styles)s">%(text)s''' % {
                 'html_tag': row.html_tag, 'text': row.text, 'styles': row.cascade_styles()}).strip()),
         elif is_closing_tag:
-            built.append(('''close</%(html_tag)s>''' %
+            built.append(('''</%(html_tag)s>''' %
                          {'html_tag': row.html_tag, }).strip())
         else:
             built.append(('''
