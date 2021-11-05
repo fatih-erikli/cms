@@ -7,15 +7,20 @@ class Page(models.Model):
     name = models.CharField(max_length=255)
     path = models.CharField(max_length=255)
     master_page = models.ForeignKey('self',
-                                    null=True, blank=True, on_delete=models.SET_NULL)
+                                    null=True,
+                                    on_delete=models.SET_NULL,
+                                    blank=True)
 
     def __str__(self):
         return self.name
 
+
 MASTER_PAGE_CONTENT = 5
 
+
 class PageContent(models.Model):
-    style = models.ForeignKey(Style, null=True, blank=True, on_delete=models.SET_NULL)
+    style = models.ForeignKey(
+        Style, null=True, blank=True, on_delete=models.SET_NULL)
     page = models.ForeignKey(
         Page, on_delete=models.SET_NULL, null=True, blank=True,
         related_name='content')
@@ -58,3 +63,15 @@ class PageContent(models.Model):
 
     def __str__(self):
         return str(self.pk)
+
+    def cascade_styles(self) -> str:
+        style = self.style
+        rules = []
+        if style:
+            for extend in style.extends.all():
+                for attribute in extend.attributes.all():
+                    rules.append(attribute.rule())
+
+            for attribute in style.attributes.all():
+                rules.append(attribute.rule())
+        return chr(32).join(rules)
