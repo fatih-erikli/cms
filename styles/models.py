@@ -23,7 +23,9 @@ class Attribute(models.Model):
                                 ('background', 'background'),
                                 ('color', 'color'),
                                 ('width', 'width'),
+                                ('max-width', 'max-width'),
                                 ('height', 'height'),
+                                ('max-height', 'max-height'),
                             ))
     value = models.CharField(max_length=255)
     unit = models.CharField(max_length=255, blank=True, null=True, choices=(
