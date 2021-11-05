@@ -11,12 +11,14 @@ class Page(models.Model):
                                     on_delete=models.SET_NULL,
                                     blank=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
+    def url(self) -> str:
+        return '/%s' % str(self.path)
 
 MASTER_PAGE_CONTENT = 5
-
+CONTENT_TYPE_ANCHOR = 9
 
 class PageContent(models.Model):
     style = models.ForeignKey(
@@ -38,6 +40,7 @@ class PageContent(models.Model):
         (6, ('Navigation')),
         (7, ('Searchbar')),
         (8, ('Footer')),
+        (CONTENT_TYPE_ANCHOR, ('Anchor')),
     ), default=0)
     order = models.IntegerField(default=0)
     text = models.TextField(null=True, blank=True)
@@ -58,10 +61,15 @@ class PageContent(models.Model):
             ('h3', 'header-3'),
             ('h4', 'header-4'),
             ('h5', 'header-5'),
+            ('a', 'anchor'),
+            ('time', 'Datetime'),
         )
     )
+    linked_page = models.ForeignKey(Page, on_delete=models.SET_NULL,
+        related_name="links", blank=True, null=True)
+    external_url = models.CharField(blank=True, null=True, max_length=255)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.pk)
 
     def cascade_styles(self) -> str:

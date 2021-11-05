@@ -19,6 +19,7 @@ from django.urls import path
 from content.views import dispatch
 
 urlpatterns = [
-    path('', dispatch),
     path('admin/', admin.site.urls),
+    path('<path:path>', dispatch),
+    path('', dispatch, kwargs={'path': '/'}),
 ]
