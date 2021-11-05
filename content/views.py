@@ -13,11 +13,11 @@ def dispatch(request):
     master_page = page.master_page
     rows = []
 
-    for content in master_page.content.all():
+    for content in master_page.content.order_by('order'):
         if content.content_type == MASTER_PAGE_CONTENT:
             rows.append(CONTENT_START)
             CONTENT_OBJECT = content
-            for content in page.content.all():
+            for content in page.content.order_by('order'):
                 rows.append(content)
             rows.append(CONTENT_END)
         else:
