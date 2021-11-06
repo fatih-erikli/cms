@@ -15,6 +15,9 @@
     }
     {% endfor %}
   </style>
+  {% for snippet in ads_snippets %}
+  {{ snippet|safe }}
+  {% endfor %}
 </head>
 <body>
 {% for line in built %}

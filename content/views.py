@@ -9,6 +9,7 @@ from django.shortcuts import render
 from content.models import CONTENT_TYPE_ANCHOR, MASTER_PAGE_CONTENT, Page
 from settings.models import Seed
 from visitors.models import Visitor
+from ads.models import Platform
 
 CONTENT_START = '<!--page-content-start-->'
 CONTENT_END = '<!--page-content-end-->'
@@ -31,7 +32,8 @@ def build_page(request, meta, built, page, classnames):
         } for item in meta.items.all()],
         'built': built,
         'page': page,
-        'classnames': classnames
+        'classnames': classnames,
+        'ads_snippets': [platform.generate_snippet() for platform in Platform.objects.all()]
     })
 
 def get_or_create_visitor(request):
