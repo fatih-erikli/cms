@@ -8,6 +8,7 @@ from django.shortcuts import render
 
 from content.models import CONTENT_TYPE_ANCHOR, MASTER_PAGE_CONTENT, Page
 from settings.models import Seed
+from visitors.models import Visitor
 
 CONTENT_START = '<!--page-content-start-->'
 CONTENT_END = '<!--page-content-end-->'
@@ -33,7 +34,21 @@ def build_page(request, meta, built, page, classnames):
         'classnames': classnames
     })
 
+def get_or_create_visitor(request):
+    browser_name = request.META.get('HTTP_USER_AGENT')
+    ip_address = request.META.get('REMOTE_ADDR')
+    visitor, created = Visitor.objects.get_or_create(
+        ip_address=ip_address,
+        browser_name=browser_name,
+        is_admin=request.user.is_superuser)
+
+    if not created:
+        visitor.refresh_count += 1
+        visitor.latest_activity_hash = uuid4().hex
+        visitor.save()
+
 def dispatch(request, path=None):
+    visitor = get_or_create_visitor(request)
     page = Page.objects.get(path=path, master_page__isnull=False)
     master_page = page.master_page
     meta = page.meta

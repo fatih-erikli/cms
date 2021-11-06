@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'content',
     'styles',
     'settings',
+    'visitors',
 ]
 
 MIDDLEWARE = [
