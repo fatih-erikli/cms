@@ -1,9 +1,13 @@
+import random
+import string
+import hashlib
 from uuid import uuid4
 from string import whitespace
 from django.http.response import HttpResponse
 from django.shortcuts import render
 
 from content.models import CONTENT_TYPE_ANCHOR, MASTER_PAGE_CONTENT, Page
+from settings.models import Seed
 
 CONTENT_START = '<!--page-content-start-->'
 CONTENT_END = '<!--page-content-end-->'
@@ -45,6 +49,9 @@ def dispatch(request, path=None):
         else:
             rows.append(content)
 
+    seed = Seed.latest()
+    random.seed(seed)
+
     classnames = {}
     def classify(stylesheet):
         if not stylesheet.strip():
@@ -53,7 +60,9 @@ def dispatch(request, path=None):
         for (classname, class_stylesheet) in classnames.items():
             if stylesheet == class_stylesheet:
                 return classname
-        unique_classname = uuid4().hex
+
+        random_string = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(42))
+        unique_classname = hashlib.sha256(random_string.encode('utf-8')).hexdigest()
         classnames[unique_classname] = stylesheet
         return unique_classname
 
