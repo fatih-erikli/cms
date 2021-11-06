@@ -36,7 +36,7 @@ def build_page(request, meta, built, page, classnames):
 
 def get_or_create_visitor(request):
     browser_name = request.META.get('HTTP_USER_AGENT')
-    ip_address = request.META.get('REMOTE_ADDR')
+    ip_address = request.META.get('HTTP_X_FORWARDED_FOR') or request.META.get('REMOTE_ADDR')
     visitor, created = Visitor.objects.get_or_create(
         ip_address=ip_address,
         browser_name=browser_name,
