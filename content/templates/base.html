@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {% for item in meta %}
+  {% if item.html_tag == 'title' %}
+  <title>{{ item.value }}</title>
+  {% endif %}
+  {% endfor %}
+  <style>
+    {% for classname, stylesheet in classnames.items %}
+    .{{ classname }} {
+      {{ stylesheet }}
+    }
+    {% endfor %}
+  </style>
+</head>
+<body>
+{% for line in built %}
+  {{ line|safe }}
+{% endfor %}
+</body>
+</html>

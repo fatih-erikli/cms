@@ -1,3 +1,4 @@
+from uuid import uuid4
 from string import whitespace
 from django.http.response import HttpResponse
 from django.shortcuts import render
@@ -14,9 +15,24 @@ def build_attributes_string(attributes) -> str:
     [space, *_] = whitespace
     return space + space.join(parts) if parts else empty_string()
 
+def build_page(request, meta, built, page, classnames):
+    return render(request, 'base.html', {
+        'meta': [{
+            'html_tag': item.html_tag,
+            'name': item.name,
+            'value': item.value % {
+                'name': page.name,
+            },
+        } for item in meta.items.all()],
+        'built': built,
+        'page': page,
+        'classnames': classnames
+    })
+
 def dispatch(request, path=None):
     page = Page.objects.get(path=path, master_page__isnull=False)
     master_page = page.master_page
+    meta = page.meta
     rows = []
 
     for content in master_page.content.order_by('order'):
@@ -29,6 +45,18 @@ def dispatch(request, path=None):
         else:
             rows.append(content)
 
+    classnames = {}
+    def classify(stylesheet):
+        if not stylesheet.strip():
+            return
+
+        for (classname, class_stylesheet) in classnames.items():
+            if stylesheet == class_stylesheet:
+                return classname
+        unique_classname = uuid4().hex
+        classnames[unique_classname] = stylesheet
+        return unique_classname
+
     built = []
     for row in rows:
         is_start_tag = row == CONTENT_START
@@ -38,8 +66,8 @@ def dispatch(request, path=None):
             row = CONTENT_OBJECT
 
         if is_start_tag:
-            built.append(('''<%(html_tag)s style="%(styles)s">%(text)s''' % {
-                'html_tag': row.html_tag, 'text': row.text, 'styles': row.cascade_styles()}).strip()),
+            built.append(('''<%(html_tag)s class="%(class)s">%(text)s''' % {
+                'html_tag': row.html_tag, 'text': row.text, 'class': classify(row.cascade_styles())}).strip()),
         elif is_closing_tag:
             built.append(('''</%(html_tag)s>''' %
                          {'html_tag': row.html_tag, }).strip())
@@ -63,11 +91,11 @@ def dispatch(request, path=None):
                 text = row.text
 
             built.append(('''
-            <%(html_tag)s style="%(styles)s"%(extra_attributes)s>%(child)s</%(html_tag)s>
+            <%(html_tag)s class="%(class)s"%(extra_attributes)s>%(child)s</%(html_tag)s>
             ''' % {
                 'html_tag': row.html_tag,
                 'child': text,
-                'styles': row.cascade_styles(),
+                'class': classify(row.cascade_styles()),
                 'extra_attributes': build_attributes_string(attributes)
             }).strip())
-    return HttpResponse('\n'.join(built))
+    return build_page(request, meta, built, page, classnames)

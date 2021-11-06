@@ -1,9 +1,11 @@
 from django.db import models
+from django.db.models.fields import related
 
 from styles.models import Style
 
 
 class Page(models.Model):
+    meta = models.ForeignKey('Meta', null=True, on_delete=models.SET_NULL)
     name = models.CharField(max_length=255)
     path = models.CharField(max_length=255)
     master_page = models.ForeignKey('self',
@@ -83,3 +85,22 @@ class PageContent(models.Model):
             for attribute in style.attributes.all():
                 rules.append(attribute.rule())
         return chr(32).join(rules)
+
+class Meta(models.Model):
+    name = models.CharField(max_length=255)
+
+    def __str__(self) -> str:
+        return self.name
+
+class MetaItem(models.Model):
+    meta = models.ForeignKey(Meta, on_delete=models.SET_NULL, null=True, related_name='items')
+    name = models.CharField(max_length=255)
+    value = models.CharField(max_length=255)
+    html_tag = models.CharField(max_length=255, choices=(
+        ('title', 'Title'),
+        ('meta', 'Meta tag'),
+        ('link', 'Link tag'),
+    ))
+
+    def __str__(self) -> str:
+        return self.name
