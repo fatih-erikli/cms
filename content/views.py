@@ -53,7 +53,7 @@ def dispatch(request, path=None):
     random.seed(seed)
 
     classnames = {}
-    def classify(stylesheet):
+    def classify(stylesheet, prefix='block'):
         if not stylesheet.strip():
             return
 
@@ -62,7 +62,10 @@ def dispatch(request, path=None):
                 return classname
 
         random_string = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(42))
-        unique_classname = hashlib.sha256(random_string.encode('utf-8')).hexdigest()
+        unique_classname = '%(prefix)s-%(hash)s' % {
+            'prefix': prefix,
+            'hash': hashlib.sha256(random_string.encode('utf-8')).hexdigest()
+        }
         classnames[unique_classname] = stylesheet
         return unique_classname
 
