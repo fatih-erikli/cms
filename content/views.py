@@ -96,7 +96,7 @@ def dispatch(request, path=None):
 
         if is_start_tag:
             built.append(('''<%(html_tag)s class="%(class)s">%(text)s''' % {
-                'html_tag': row.html_tag, 'text': row.text, 'class': classify(row.cascade_styles())}).strip()),
+                'html_tag': row.html_tag, 'text': row.render_text(), 'class': classify(row.cascade_styles())}).strip()),
         elif is_closing_tag:
             built.append(('''</%(html_tag)s>''' %
                          {'html_tag': row.html_tag, }).strip())
@@ -108,16 +108,16 @@ def dispatch(request, path=None):
                         'href': row.linked_page.url(),
                         'title': title,
                     }
-                    text = row.text or title
+                    text = row.render_text() or title
                 else:
                     attributes = {
                         'href': row.external_url,
                         'title': 'External link',
                     }
-                    text = row.text
+                    text = row.render_text()
             else:
                 attributes = {}
-                text = row.text
+                text = row.render_text()
 
             built.append(('''
             <%(html_tag)s class="%(class)s"%(extra_attributes)s>%(child)s</%(html_tag)s>

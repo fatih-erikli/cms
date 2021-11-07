@@ -21,6 +21,7 @@ class Page(models.Model):
 
 MASTER_PAGE_CONTENT = 5
 CONTENT_TYPE_ANCHOR = 9
+CONTENT_TYPE_CODE = 10
 
 class PageContent(models.Model):
     style = models.ForeignKey(
@@ -43,6 +44,7 @@ class PageContent(models.Model):
         (7, ('Searchbar')),
         (8, ('Footer')),
         (CONTENT_TYPE_ANCHOR, ('Anchor')),
+        (CONTENT_TYPE_CODE, ('Code')),
     ), default=0)
     order = models.IntegerField(default=0)
     text = models.TextField(null=True, blank=True)
@@ -65,6 +67,7 @@ class PageContent(models.Model):
             ('h5', 'header-5'),
             ('a', 'anchor'),
             ('time', 'Datetime'),
+            ('code', 'Code'),
         )
     )
     linked_page = models.ForeignKey(Page, on_delete=models.SET_NULL,
@@ -85,6 +88,16 @@ class PageContent(models.Model):
             for attribute in style.attributes.all():
                 rules.append(attribute.rule())
         return chr(32).join(rules)
+
+    def render_text(self):
+        if self.content_type == CONTENT_TYPE_CODE:
+            from pygments import highlight
+            from pygments.lexers import PythonLexer
+            from pygments.formatters import HtmlFormatter
+
+            code = self.text
+            return (highlight(code, PythonLexer(), HtmlFormatter()))
+        return self.text
 
 class Meta(models.Model):
     name = models.CharField(max_length=255)
